@@ -1,3 +1,5 @@
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -6,70 +8,72 @@ import java.io.PrintStream;
 
 public class CheckItTest {
 
+
+    private final PrintStream originalOut = System.out;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    @Before
+    public void setUpStreams() {
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @After
+    public void restoreStreams() {
+        System.setOut(originalOut);
+        outContent.reset();
+    }
+
     // ------------------------------PREDICATE COVERAGE------------------------------------------
     @Test
     public void testPredicateTrue() {
-        assertTrue(checkItPredicate(true, true, true));
+        CheckIt.checkIt(true, true, true);
+        assertEquals("P is true", outContent.toString());
     }
 
     @Test
     public void testPredicateFalse() {
-        assertFalse(checkItPredicate(false, false, false));
+        CheckIt.checkIt(false, false, false);
+        assertEquals("P isn't true", outContent.toString());
     }
 
     // ----------------------------------CLAUSE COVERAGE---------------------------------------------------
     @Test
     public void testClauseTrue() {
-        assertTrue(checkItClause(true, true, true));
+        CheckIt.checkIt(true, true, true);
+        assertEquals("P is true", outContent.toString());
     }
 
     @Test
     public void testClauseFalse() {
-        assertFalse(checkItClause(false, false, false));
+        CheckIt.checkIt(false, false, false);
+        assertEquals("P isn't true", outContent.toString());
     }
+
 
     //------------------------------CACC COVERAGE---------------------------------------------------
 
     @Test
-    public void testCorrelatedActiveClause1() {
-        assertTrue(checkItClause(true, true, false));
+    public void testCorrelatedActiveClauseTrue() {
+        CheckIt.checkIt(true, true, false);
+        assertEquals("P is true", outContent.toString());
     }
 
     @Test
-    public void testCorrelatedActiveClause2() {
-        assertFalse(checkItClause(false, true, true));
+    public void testCorrelatedActiveClauseFalse() {
+        CheckIt.checkIt(false, true, false);
+        assertEquals("P isn't true", outContent.toString());
     }
-
-    //------------------------------CACC COVERAGE---------------------------------------------------
+    //------------------------------RACC COVERAGE---------------------------------------------------
 
     @Test
-    public void testRACCCoverage1() {
-        assertTrue(checkItClause(true, false, true));
+    public void testRACCCoverageTrue() {
+        CheckIt.checkIt(true, false, true);
+        assertEquals("P is true", outContent.toString());
     }
-
     @Test
-    public void testRACCCoverage2() {
-        assertFalse(checkItClause(false, false, true));
-    }
-
-
-
-    // Helper method to test the predicate condition
-    private boolean checkItPredicate(boolean a, boolean b, boolean c) {
-      
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-
-        CheckIt.checkIt(a, b, c);
-
-        String printedOutput = outContent.toString();
-        System.setOut(System.out);
-
-        if (a || (b && c)) {
-            return printedOutput.trim().equals("P is true");
-        } else {
-            return printedOutput.trim().equals("P isn't true");
-        }
+    public void testRACCCoverageFalse() {
+        CheckIt.checkIt(false, false, true);
+        assertEquals("P isn't true", outContent.toString());
     }
 
 }
